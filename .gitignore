@@ -1,3 +1,10 @@
+# vs code
+.vscode/
+
+# Test data and site for logs
+data/
+logs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
