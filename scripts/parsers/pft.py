@@ -53,13 +53,13 @@ class PFTParse(baseparse.BaseParse):
         
         if len(vals) == 4:
             return {'Predicted': float(vals[0]),
-                    'Measured': float(vals[1]),
-                    'Percent_pred': float(vals[2]),
-                    'SR': float(vals[3])}
+                    'Measured_pre': float(vals[1]),
+                    'Percent_pred_pre': float(vals[2]),
+                    'SR_pre': float(vals[3])}
         elif len(vals) == 3:
             return {'Predicted': float(vals[0]),
-                    'Measured': float(vals[1]),
-                    'Percent_pred': float(vals[2])}
+                    'Measured_pre': float(vals[1]),
+                    'Percent_pred_pre': float(vals[2])}
         elif len(vals) == 8:
             return {'Predicted': float(vals[0]),
                     'Measured_pre': float(vals[1]),
