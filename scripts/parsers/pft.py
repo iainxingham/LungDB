@@ -44,11 +44,16 @@ class PFTParse(baseparse.BaseParse):
         re_lung = re.compile(regex)
         re_values = re.compile(r'(-?\d{1,3}\.?\d{0,2})')
 
+        self._log('Extracting {0}'.format(measurement))
+
         if measurement == 'FEV1':
             vals = re_values.findall(re_lung.search(self.text).group(0))[1:]
         elif measurement == 'VC':
             vals = re_values.findall(re_lung.findall(self.text)[1])
         else:
+            if re_lung.search(self.text) is None:
+                self._log('No {0} in record {1}'.format(measurement, self.source_file))
+                return {}
             vals = re_values.findall(re_lung.search(self.text).group(0))
         
         if len(vals) == 4:

@@ -17,7 +17,8 @@ class ParseError(Enum):
 class BaseParse:
     def __init__(self, file: Path):
         self.extracted = dict()
-        self.source_file = file.resolve().as_uri()
+        # May need to find as_posix() alternative for windows!
+        self.source_file = file.resolve().as_posix()
         if file.exists():
             data = parser.from_file(self.source_file)
             self.text = data['content']
@@ -41,7 +42,7 @@ class BaseParse:
             self.extracted[key] = result.group(group)
 
     def _log(self, msg: str):
-        logging.warning(str)
+        logging.warning(msg)
 
     def get_data(self) -> dict:
         """

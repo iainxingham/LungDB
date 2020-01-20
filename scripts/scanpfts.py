@@ -1,4 +1,8 @@
 # Read PFT results from pdf
+import sys
+import os
+folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, folder)
 
 from pathlib import Path
 import logging
@@ -33,7 +37,7 @@ def read_dir(p: Path):
     """
     logging.info('Reading {0}'.format(p.name))
     for f in p.glob('*.pdf'):
-        parse_pdf(f.name, Parsetype.PT_FULL_PFT)
+        parse_pdf(f, Parsetype.PT_FULL_PFT)
     for d in [x for x in p.iterdir() if x.is_dir()]:
         read_dir(d)
 
@@ -43,11 +47,11 @@ def parse_pdf(f: Path, p: Parsetype):
     Extracts data from file and adds to database
     """
     if p == Parsetype.PT_FULL_PFT:
-        logging.info('Parsing {0} as PT_FULL_PFT'.format(p.name))
+        logging.info('Parsing {0} as PT_FULL_PFT'.format(f.name))
         result = PFTParse(f)
 
     else:
-        logging.error('Unrecognised parser for file {0}'.format(p.name))
+        logging.error('Unrecognised parser for file {0}'.format(f.name))
         return
 
     if result.is_ok():
@@ -118,7 +122,7 @@ def add_to_db(rec: dict, p: Parsetype):
             logging.error('Problem adding record!')
 
         session.commit()
-        
+
     else:
         logging.error('Tried to add record with no RXR')
 
@@ -155,9 +159,9 @@ def get_pft_vals(key: str, rec: dict) -> tuple:
         logging.error('Lung function, get_pft_vals() - no data found')
         return (None, None, None, None)
 
-    measured = rec[key]['Measured_pre']
-    pred = rec[key]['Predicted']
-    percent = rec[key]['Percent_pred_pre']
+    measured = (rec[key]['Measured_pre'] if 'Measured_pre' in rec[key] else None)
+    pred = (rec[key]['Predicted'] if 'Predicted' in rec[key] else None)
+    percent = (rec[key]['Percent_pred_pre'] if 'Percent_pred_pre' in rec[key] else None)
     sr = (rec[key]['SR_pre'] if 'SR_pre' in rec[key] else None)
 
     return (measured, pred, percent, sr)
