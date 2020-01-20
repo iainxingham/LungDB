@@ -80,30 +80,56 @@ def add_to_db(rec: dict, p: Parsetype):
 
             spirorec.fev1_pre, spirorec.fev1_pred, spirorec.fev1_pre_percent_pred, spirorec.fev1_pre_SR, \
                 spirorec.fev1_post, spirorec.fev1_percent_change, spirorec.fev1_post_percent_pred, \
-                spirorec.fev1_post_SR = get_pft_vals('FEV1', rec)
+                spirorec.fev1_post_SR = get_spiro_vals('FEV1', rec)
 
             spirorec.fvc_pre, spirorec.fvc_pred, spirorec.fvc_pre_percent_pred, spirorec.fvc_pre_SR, \
                 spirorec.fvc_post, spirorec.fvc_percent_change, spirorec.fvc_post_percent_pred, \
-                spirorec.fvc_post_SR = get_pft_vals('FVC', rec)
-            
-            lungrec = db.Lungfunc(subject = rxrrec, \
-                                  study_date = (dtparser.parse(rec['date']).date() if 'date' in rec else None), \
-                                  spiro = spirorec)
+                spirorec.fvc_post_SR = get_spiro_vals('FVC', rec)
+
+            if 'TLco' in rec:
+                lungrec = db.Lungfunc(subject = rxrrec, \
+                            study_date = (dtparser.parse(rec['date']).date() if 'date' in rec else None), \
+                            spiro = spirorec)
+
+                lungrec.tlco, lungrec.tlco_pred, lungrec.tlco_percent_pred, \
+                    lungrec.tlco_SR = get_pft_vals('TLco', rec)
+                lungrec.vasb, lungrec.vasb_pred, lungrec.vasb_percent_pred, \
+                    _ = get_pft_vals('VAsb', rec)
+                lungrec.kco, lungrec.kco_pred, lungrec.kco_percent_pred, \
+                    _ = get_pft_vals('KCO', rec)
+                lungrec.frc, lungrec.frc_pred, lungrec.frc_percent_pred, \
+                    lungrec.frc_SR = get_pft_vals('FRC', rec)
+                lungrec.vc, lungrec.vc_pred, lungrec.vc_percent_pred, \
+                    lungrec.vc_SR = get_pft_vals('VC', rec)
+                lungrec.tlc, lungrec.tlc_pred, lungrec.tlc_percent_pred, \
+                    lungrec.tlc_SR = get_pft_vals('TLC', rec)
+                lungrec.rv, lungrec.rv_pred, lungrec.rv_percent_pred, \
+                    lungrec.rv_SR = get_pft_vals('RV', rec)
+                lungrec.tlcrv, lungrec.tlcrv_pred, lungrec.tlcrv_percent_pred, \
+                    lungrec.tlcrv_SR = get_pft_vals('RV_TLC', rec)
+
+                session.add(lungrec)
+
+            else:
+                session.add(spirorec)
+
         
         else:
             logging.error('Problem adding record!')
 
+        session.commit()
+        
     else:
         logging.error('Tried to add record with no RXR')
 
-def get_pft_vals(key: str, rec: dict) -> tuple:
+def get_spiro_vals(key: str, rec: dict) -> tuple:
     """
-    Takes a lung function test (eg FEV1, FVC, etc) as key and returns an 8-tuple
+    Takes a spirometry test (eg FEV1, FVC, etc) as key and returns an 8-tuple
     with pre then post measured, %predicted, SR as well as predicted and percent change
     Fills tuple position with None if value doesn't exist
     """
     if not key in rec:
-        logging.error('Lung function, get_pft_vals() - no data found')
+        logging.error('Lung function, get_spiro_vals() - no data found')
         return (None, None, None, None, None, None, None, None)
 
     pre = rec[key]['Measured_pre']
@@ -117,6 +143,24 @@ def get_pft_vals(key: str, rec: dict) -> tuple:
     post_SR = (rec[key]['SR_post'] if 'SR_post' in rec[key] else None)
 
     return (pre, pred, pre_percent_pred, pre_SR, post, percent_change, post_percent_pred, post_SR)
+
+def get_pft_vals(key: str, rec: dict) -> tuple:
+    """
+    Takes a lung function test (eg TLco, etc) as key and returns an 4-tuple
+    with measured, predicted, %predicted, SR 
+    Fills tuple position with None if value doesn't exist
+    Use get_spiro_vals() for measures with reversibility
+    """
+    if not key in rec:
+        logging.error('Lung function, get_pft_vals() - no data found')
+        return (None, None, None, None)
+
+    measured = rec[key]['Measured_pre']
+    pred = rec[key]['Predicted']
+    percent = rec[key]['Percent_pred_pre']
+    sr = (rec[key]['SR_pre'] if 'SR_pre' in rec[key] else None)
+
+    return (measured, pred, percent, sr)
 
 if __name__ == '__main__':
     main()
