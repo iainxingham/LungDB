@@ -9,7 +9,13 @@ class PFTParse(baseparse.BaseParse):
         super().__init__(file)
 
         if self.error_code is baseparse.ParseError.PARSE_NOT_EXTRACTED_YET:
-            self.extract() 
+            self.extract()
+
+        if self.error_code is baseparse.ParseError.PARSE_NOT_EXTRACTED_YET:
+            self.error_code = baseparse.ParseError.PARSE_OK
+        elif self.error_code is baseparse.ParseError.PARSE_CANT_EXTRACT:
+            if len(self.extracted) > 0:
+                self.error_code = baseparse.ParseError.PARSE_PARTIAL_EXTRACT 
 
     def extract(self):
         self._add_extract('RXR', r'Patient ID:[\s]*(((rxr)|(RXR))(\d){7})', 1)
@@ -38,9 +44,6 @@ class PFTParse(baseparse.BaseParse):
 
         for i in lung_func:
             self.extracted[i] = self.extract_lung_func(lung_func[i], i)
-
-        if self.error_code is baseparse.ParseError.PARSE_NOT_EXTRACTED_YET:
-            self.error_code = baseparse.ParseError.PARSE_OK
 
     def extract_lung_func(self, regex: str, measurement: str) -> dict:
         re_lung = re.compile(regex)

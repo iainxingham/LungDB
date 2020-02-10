@@ -58,7 +58,7 @@ def parse_pdf(f: Path, p: Parsetype):
         logging.error('Unrecognised parser for file {0}'.format(f.name))
         return
 
-    if result.is_ok():
+    if result.is_any_data():
         add_to_db(result.get_data(), p)
         
     else:
@@ -101,8 +101,8 @@ def add_to_db(rec: dict, p: Parsetype):
             spirorec.fvc_pre, spirorec.fvc_pred, spirorec.fvc_pre_percent_pred, spirorec.fvc_pre_SR, \
                 spirorec.fvc_post, spirorec.fvc_percent_change, spirorec.fvc_post_percent_pred, \
                 spirorec.fvc_post_SR = get_spiro_vals('FVC', rec)
-
-            if 'TLco' in rec:
+            
+            if 'TLco' in rec: # TLco added but empty - test len(TLco) instead??
                 lungrec = db.Lungfunc(subject = rxrrec, \
                             study_date = (dtparser.parse(rec['date']).date() if 'date' in rec else None), \
                             spiro = spirorec)
@@ -127,6 +127,7 @@ def add_to_db(rec: dict, p: Parsetype):
                 session.add(lungrec)
 
             else:
+                logging.info('{0}: Adding isolated spiro'.format(rec['RXR']))
                 session.add(spirorec)
 
         

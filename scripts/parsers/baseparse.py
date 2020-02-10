@@ -13,6 +13,7 @@ class ParseError(Enum):
     PARSE_NO_FILE = auto()
     PARSE_CANT_EXTRACT = auto()
     PARSE_NOT_EXTRACTED_YET = auto()
+    PARSE_PARTIAL_EXTRACT = auto()
 
 class BaseParse:
     def __init__(self, file: Path):
@@ -33,11 +34,17 @@ class BaseParse:
         else:
             return False
 
+    def is_any_data(self) -> bool:
+        if self.error_code in [ParseError.PARSE_OK, ParseError.PARSE_PARTIAL_EXTRACT]:
+            return True
+        else:
+            return False
+
     def _add_extract(self, key: str, regex: str, group: int):
         result = re.compile(regex).search(self.text)
         if result is None:
             self._log('Unable to extract \"{0}\" from {1}\n'.format(key, self.source_file))
-            self.error_code = ParseError.PARSE_CANT_EXTRACT
+            self.error_code = ParseError.PARSE_CANT_EXTRACT        
         else:
             self.extracted[key] = result.group(group)
 
