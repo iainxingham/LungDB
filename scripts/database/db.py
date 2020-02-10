@@ -1,4 +1,4 @@
-# Databasae definitions
+# Database definitions
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Date, Float, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -93,3 +93,14 @@ class Lungfunc(Base):
     tlcrv_pred = Column(Float)
     tlcrv_percent_pred = Column(Float)
     tlcrv_SR = Column(Float)
+
+class Physiology(Base):
+    __tablename__ = 'physiology'
+    id = Column(Integer, primary_key = True)
+
+    subject_id = Column(Integer, ForeignKey('patient.id'))
+    subject = relationship('Patient')
+
+    study_date = Column(Date)
+    height = Column(Float)
+    weight = Column(Float)

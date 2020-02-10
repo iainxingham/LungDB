@@ -78,6 +78,13 @@ def add_to_db(rec: dict, p: Parsetype):
             # TODO check for inconsistencies in name & dob
             pass
         
+        if 'height' in rec:
+            phys = db.Physiology(subject = rxrrec, \
+                                 study_date = (dtparser.parse(rec['date']).date() if 'date' in rec else None), \
+                                 height = (rec['height'] if 'height' in rec else None), \
+                                 weight = (rec['weight'] if 'weight' in rec else None))
+            session.add(phys)
+        
         if p is Parsetype.PT_FULL_PFT:
             spirorec = db.Spirometry(subject = rxrrec, \
                                      study_date = (dtparser.parse(rec['date']).date() if 'date' in rec else None))
