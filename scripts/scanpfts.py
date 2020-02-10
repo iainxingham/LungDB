@@ -3,6 +3,7 @@ import sys
 import os
 folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, folder)
+#os.environ['TIKA_SERVER_JAR'] = os.path.abspath(os.path.join(folder, r'tika_java/tika-server-1.23.jar'))
 
 from pathlib import Path
 import logging
@@ -25,6 +26,8 @@ session = DBSession()
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO, \
                     filename='./logs/lungdb.log')
 
+#logging.info('Java directory: {0}'.format(os.environ['TIKA_SERVER_JAR']))
+
 def main():
     logging.info('Starting main - scanpfts.py')
     p = Path('./data') # Replace this with pft directory
@@ -37,6 +40,7 @@ def read_dir(p: Path):
     """
     logging.info('Reading {0}'.format(p.name))
     for f in p.glob('*.pdf'):
+        if 'TREND' in str(f): continue
         parse_pdf(f, Parsetype.PT_FULL_PFT)
     for d in [x for x in p.iterdir() if x.is_dir()]:
         read_dir(d)
@@ -72,8 +76,9 @@ def add_to_db(rec: dict, p: Parsetype):
             # Make new rxr record
             rxrrec = db.Patient(rxr = rec['RXR'].upper(), \
                                 dob = (dtparser.parse(rec['dob']).date() if 'dob' in rec else None), \
-                                lname = (rec['lname'] if 'lname' in rec else None), \
-                                fname = (rec['fname'] if 'fname' in rec else None))
+                                lname = (rec['lname'].lower().capitalize() if 'lname' in rec else None), \
+                                fname = (rec['fname'].lower().capitalize() if 'fname' in rec else None), \
+                                sex = (rec['sex'].lower().capitalize() if 'sex' in rec else None))
         else:
             # TODO check for inconsistencies in name & dob
             pass

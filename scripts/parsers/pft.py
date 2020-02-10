@@ -22,6 +22,8 @@ class PFTParse(baseparse.BaseParse):
         self._add_extract('lname', r'Last Name:[\s]*([A-Za-z]+)', 1)
         self._add_extract('fname', r'First Name:[\s]*([A-Za-z]+)', 1)
 
+        self._add_extract('sex', r'Gender:[\s]*((Male)|(MALE)|(Female)|(FEMALE))', 1)
+
         lung_func = {'FEV1': r'FEV1.*',
                      'FVC': r'FVC.*',
                      'TLco': r'TLco.*',
@@ -44,12 +46,18 @@ class PFTParse(baseparse.BaseParse):
         re_lung = re.compile(regex)
         re_values = re.compile(r'(-?\d{1,3}\.?\d{0,2})')
 
-        self._log('Extracting {0}'.format(measurement))
+        #self._log('Extracting {0}'.format(measurement))
 
         if measurement == 'FEV1':
             vals = re_values.findall(re_lung.search(self.text).group(0))[1:]
         elif measurement == 'VC':
-            vals = re_values.findall(re_lung.findall(self.text)[1])
+            res = re_lung.findall(self.text)
+            if len(res) == 0:
+                return {}
+            elif len(res) == 1:
+                vals = re_values.findall(res[0])
+            else:
+                vals = re_values.findall(res[1])
         else:
             if re_lung.search(self.text) is None:
                 self._log('No {0} in record {1}'.format(measurement, self.source_file))

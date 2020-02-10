@@ -5,6 +5,9 @@
 data/
 logs/
 
+# Local copy of tika java jar
+tika_java/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

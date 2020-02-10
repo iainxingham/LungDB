@@ -14,6 +14,7 @@ class Patient(Base):
     rxr = Column(String(10), unique = True)
     nhs = Column(String(15))
     dob = Column(Date)
+    sex = Column(String(10))
 
 class Spirometry(Base):
     __tablename__ = 'spirometry'
